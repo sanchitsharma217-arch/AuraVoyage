@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { TravelProvider, useTravel } from './context/TravelContext';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
-import { ShowcaseDemoBar } from './components/common/ShowcaseDemoBar';
 import { LuxuryBrandValueBanner } from './components/common/LuxuryBrandValueBanner';
 import { InteractiveDestinationExplorer } from './components/common/InteractiveDestinationExplorer';
 import { CategoryPills } from './components/CategoryPills';
@@ -28,9 +27,6 @@ const MainContent: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800 antialiased selection:bg-amber-500 selection:text-white pb-16 md:pb-0">
       {/* Toast Notification Container */}
       <Toast />
-
-      {/* Recruiter / Client Showcase Guide Bar */}
-      <ShowcaseDemoBar />
 
       {/* Main Luxury Navbar */}
       <Navbar />
