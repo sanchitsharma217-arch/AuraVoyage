@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { TravelProvider, useTravel } from './context/TravelContext';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
+import { ShowcaseDemoBar } from './components/common/ShowcaseDemoBar';
+import { LuxuryBrandValueBanner } from './components/common/LuxuryBrandValueBanner';
+import { InteractiveDestinationExplorer } from './components/common/InteractiveDestinationExplorer';
 import { CategoryPills } from './components/CategoryPills';
 import { TourList } from './components/tours/TourList';
 import { HotelList } from './components/hotels/HotelList';
@@ -14,6 +17,7 @@ import { CartDrawer } from './components/cart/CartDrawer';
 import { WishlistDrawer } from './components/cart/WishlistDrawer';
 import { CheckoutModal } from './components/cart/CheckoutModal';
 import { MyBookingsModal } from './components/bookings/MyBookingsModal';
+import { MobileBottomNav } from './components/common/MobileBottomNav';
 import { Toast } from './components/common/Toast';
 
 const MainContent: React.FC = () => {
@@ -21,15 +25,24 @@ const MainContent: React.FC = () => {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800 antialiased selection:bg-sky-500 selection:text-white">
+    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800 antialiased selection:bg-amber-500 selection:text-white pb-16 md:pb-0">
       {/* Toast Notification Container */}
       <Toast />
 
-      {/* Main Navbar */}
+      {/* Recruiter / Client Showcase Guide Bar */}
+      <ShowcaseDemoBar />
+
+      {/* Main Luxury Navbar */}
       <Navbar />
 
       {/* Hero with Unified Search Bar */}
       <Hero />
+
+      {/* Brand Value Pillars: The AuraVoyage Standard */}
+      <LuxuryBrandValueBanner />
+
+      {/* Interactive Destination Atlas & Weather Explorer */}
+      <InteractiveDestinationExplorer />
 
       {/* Category Navigation Pills */}
       <CategoryPills />
@@ -67,6 +80,9 @@ const MainContent: React.FC = () => {
         onClose={() => setIsCheckoutOpen(false)}
       />
       <MyBookingsModal />
+
+      {/* Floating Mobile Bottom Navigation */}
+      <MobileBottomNav />
     </div>
   );
 };

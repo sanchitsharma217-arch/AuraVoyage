@@ -15,6 +15,8 @@ import {
   ChevronUp,
   Heart,
   ShoppingBag,
+  Sparkles,
+  Award,
 } from 'lucide-react';
 
 interface TourDetailModalProps {
@@ -32,6 +34,7 @@ export const TourDetailModal: React.FC<TourDetailModalProps> = ({
 
   if (!tour) return null;
 
+  const [activeImage, setActiveImage] = useState(tour.featuredImage);
   const [selectedDate, setSelectedDate] = useState(tour.startDates[0] || '2026-11-20');
   const [travelersCount, setTravelersCount] = useState(2);
   const [expandedDay, setExpandedDay] = useState<number | null>(1);
@@ -43,26 +46,28 @@ export const TourDetailModal: React.FC<TourDetailModalProps> = ({
     setExpandedDay(expandedDay === day ? null : day);
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-4 bg-slate-950/70 backdrop-blur-sm overflow-y-auto">
-      <div className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col border border-slate-200">
-        {/* Modal Header */}
-        <div className="relative h-44 sm:h-64 w-full shrink-0 overflow-hidden bg-slate-900">
-          <img
-            src={tour.featuredImage}
-            alt={tour.title}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent" />
+  const allImages = [tour.featuredImage, ...(tour.galleryImages || [])];
 
-          {/* Close & Action Buttons */}
-          <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-1.5 sm:gap-2 z-10">
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2.5 sm:p-5 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
+      <div className="animate-modal-pop relative w-full max-w-4xl bg-white rounded-3xl shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col border border-amber-500/30">
+        {/* Modal Header with Image & Gallery */}
+        <div className="relative h-56 sm:h-72 w-full shrink-0 overflow-hidden bg-slate-900">
+          <img
+            src={activeImage}
+            alt={tour.title}
+            className="w-full h-full object-cover transition-all duration-500"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-black/30" />
+
+          {/* Close & Wishlist Buttons */}
+          <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
             <button
               onClick={() => toggleWishlist(tour.id, tour.title)}
-              className={`p-2 rounded-full backdrop-blur-sm transition-colors ${
+              className={`p-2.5 rounded-full backdrop-blur-md transition-all ${
                 isFavorited
-                  ? 'bg-rose-500 text-white'
-                  : 'bg-black/40 text-white hover:bg-white hover:text-slate-900'
+                  ? 'bg-rose-500 text-white shadow-md'
+                  : 'bg-black/50 text-white hover:bg-white hover:text-slate-900'
               }`}
               aria-label="Wishlist"
             >
@@ -70,120 +75,142 @@ export const TourDetailModal: React.FC<TourDetailModalProps> = ({
             </button>
             <button
               onClick={onClose}
-              className="p-2 rounded-full bg-black/40 hover:bg-black text-white backdrop-blur-sm transition-colors"
+              className="p-2.5 rounded-full bg-black/50 hover:bg-black text-white backdrop-blur-md transition-colors"
               aria-label="Close"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
 
+          {/* Gallery Thumbnails Overlay */}
+          <div className="absolute top-4 left-4 flex gap-1.5 z-10">
+            {allImages.slice(0, 4).map((img, idx) => (
+              <button
+                key={idx}
+                onClick={() => setActiveImage(img)}
+                className={`w-9 h-9 rounded-lg overflow-hidden border-2 transition-all ${
+                  activeImage === img ? 'border-amber-400 scale-105' : 'border-white/40 opacity-70 hover:opacity-100'
+                }`}
+              >
+                <img src={img} alt="preview" className="w-full h-full object-cover" />
+              </button>
+            ))}
+          </div>
+
           {/* Title & Location in Header */}
-          <div className="absolute bottom-3 sm:bottom-4 left-4 right-4 sm:left-6 sm:right-6 text-white">
-            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1.5 text-xs">
-              <span className="bg-white/20 backdrop-blur-sm text-white text-[9px] sm:text-[10px] font-medium px-2 py-0.5 rounded uppercase">
-                {tour.theme}
+          <div className="absolute bottom-4 left-4 right-4 sm:left-6 sm:right-6 text-white">
+            <div className="flex flex-wrap items-center gap-2 mb-2 text-xs">
+              <span className="bg-amber-400/20 backdrop-blur-md text-amber-300 border border-amber-400/30 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                ✦ {tour.theme} Expedition
               </span>
-              <div className="flex items-center gap-1 font-semibold text-amber-300 text-[11px] sm:text-xs">
-                <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-current" />
+              <div className="flex items-center gap-1 font-semibold text-amber-300 text-xs bg-black/40 backdrop-blur-md px-2 py-0.5 rounded-full border border-white/10">
+                <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                 <span>{tour.rating.toFixed(2)}</span>
-                <span className="text-white/70 font-normal">({tour.reviewsCount})</span>
+                <span className="text-white/70 font-normal">({tour.reviewsCount} reviews)</span>
               </div>
-              <div className="flex items-center gap-1 text-white/80 text-[11px] sm:text-xs">
-                <MapPin className="w-3 h-3 text-slate-300" />
+              <div className="flex items-center gap-1 text-white/90 text-xs bg-black/40 backdrop-blur-md px-2.5 py-0.5 rounded-full border border-white/10">
+                <MapPin className="w-3.5 h-3.5 text-amber-400" />
                 <span>
                   {tour.destination}, {tour.country}
                 </span>
               </div>
             </div>
-            <h2 className="text-lg sm:text-2xl md:text-3xl font-bold tracking-tight leading-snug">
+
+            <h2 className="text-xl sm:text-3xl font-serif font-bold tracking-tight text-white leading-tight">
               {tour.title}
             </h2>
-            <p className="text-[11px] sm:text-xs text-slate-300 mt-0.5 line-clamp-1 font-normal hidden sm:block">
+            <p className="text-xs text-slate-300 mt-1 line-clamp-1 font-normal hidden sm:block">
               {tour.tagline}
             </p>
           </div>
         </div>
 
         {/* Modal Scrollable Content */}
-        <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-4 sm:space-y-6">
+        <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-5 bg-white">
           {/* Overview Section */}
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">
-              Overview
+            <h3 className="text-xs font-bold uppercase tracking-widest text-amber-800 mb-1.5 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+              <span>Expedition Overview</span>
             </h3>
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">{tour.overview}</p>
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">{tour.overview}</p>
           </div>
 
           {/* Quick Metrics Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 bg-slate-50 p-2.5 sm:p-3.5 rounded-xl border border-slate-200">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-amber-50/50 p-3 sm:p-4 rounded-2xl border border-amber-200/60">
             <div>
-              <span className="block text-[9px] sm:text-[10px] uppercase tracking-wider text-slate-400 font-medium">
+              <span className="block text-[10px] uppercase tracking-wider text-slate-500 font-semibold">
                 Duration
               </span>
-              <span className="text-xs font-semibold text-slate-800 flex items-center gap-1 mt-0.5">
-                <Clock className="w-3.5 h-3.5 text-slate-500" />
+              <span className="text-xs sm:text-sm font-semibold text-slate-900 flex items-center gap-1.5 mt-0.5">
+                <Clock className="w-3.5 h-3.5 text-amber-600" />
                 {tour.durationDays}D / {tour.durationNights}N
               </span>
             </div>
             <div>
-              <span className="block text-[9px] sm:text-[10px] uppercase tracking-wider text-slate-400 font-medium">
-                Group Size
+              <span className="block text-[10px] uppercase tracking-wider text-slate-500 font-semibold">
+                Party Size
               </span>
-              <span className="text-xs font-semibold text-slate-800 flex items-center gap-1 mt-0.5">
-                <Users className="w-3.5 h-3.5 text-slate-500" />
+              <span className="text-xs sm:text-sm font-semibold text-slate-900 flex items-center gap-1.5 mt-0.5">
+                <Users className="w-3.5 h-3.5 text-amber-600" />
                 {tour.groupSize}
               </span>
             </div>
             <div>
-              <span className="block text-[9px] sm:text-[10px] uppercase tracking-wider text-slate-400 font-medium">
-                Pace
+              <span className="block text-[10px] uppercase tracking-wider text-slate-500 font-semibold">
+                Experience Pace
               </span>
-              <span className="text-xs font-semibold text-slate-800 mt-0.5 block">
-                {tour.difficulty}
+              <span className="text-xs sm:text-sm font-semibold text-slate-900 mt-0.5 block">
+                {tour.difficulty} Luxury
               </span>
             </div>
             <div>
-              <span className="block text-[9px] sm:text-[10px] uppercase tracking-wider text-slate-400 font-medium">
-                Guarantee
+              <span className="block text-[10px] uppercase tracking-wider text-slate-500 font-semibold">
+                Concierge Status
               </span>
-              <span className="text-xs font-semibold text-slate-800 flex items-center gap-1 mt-0.5">
-                <ShieldCheck className="w-3.5 h-3.5 text-slate-600" />
-                Verified Rate
+              <span className="text-xs sm:text-sm font-semibold text-slate-900 flex items-center gap-1.5 mt-0.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                Verified Itinerary
               </span>
             </div>
           </div>
 
           {/* Day-by-Day Detailed Itinerary */}
           <div>
-            <div className="flex items-center justify-between mb-2.5 sm:mb-3">
-              <h3 className="text-xs sm:text-sm font-bold text-slate-900">Daily Itinerary</h3>
-              <span className="text-xs text-slate-500">
-                {tour.itinerary.length} Days Planned
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-serif font-bold text-slate-900 flex items-center gap-2">
+                <span>Curated Day-by-Day Timeline</span>
+                <span className="text-xs font-sans font-normal text-slate-500">
+                  ({tour.itinerary.length} Days)
+                </span>
+              </h3>
+              <span className="text-xs text-amber-700 font-semibold">
+                All transfers & dining coordinated
               </span>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {tour.itinerary.map((dayPlan) => {
                 const isExpanded = expandedDay === dayPlan.day;
                 return (
                   <div
                     key={dayPlan.day}
-                    className="border border-slate-200 rounded-xl overflow-hidden bg-white"
+                    className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-xs"
                   >
                     <button
                       onClick={() => toggleDay(dayPlan.day)}
-                      className="w-full p-2.5 sm:p-3.5 flex items-center justify-between text-left hover:bg-slate-50 transition-colors"
+                      className="w-full p-3 sm:p-4 flex items-center justify-between text-left hover:bg-slate-50 transition-colors cursor-pointer"
                     >
-                      <div className="flex items-center gap-2 sm:gap-3">
-                        <span className="w-5 h-5 sm:w-6 sm:h-6 rounded bg-slate-900 text-white font-semibold text-[10px] sm:text-[11px] flex items-center justify-center shrink-0">
-                          {dayPlan.day}
+                      <div className="flex items-center gap-3">
+                        <span className="w-7 h-7 rounded-lg bg-slate-900 text-amber-300 font-serif font-bold text-xs flex items-center justify-center shrink-0 shadow-sm">
+                          D{dayPlan.day}
                         </span>
                         <div>
-                          <h4 className="text-xs font-semibold text-slate-900 line-clamp-1">
+                          <h4 className="text-xs sm:text-sm font-serif font-bold text-slate-900 line-clamp-1">
                             {dayPlan.title}
                           </h4>
-                          <span className="text-[10px] sm:text-[11px] text-slate-500">
-                            Lodging: {dayPlan.stay}
+                          <span className="text-[11px] text-slate-500">
+                            Sanctuary: <strong className="text-slate-700">{dayPlan.stay}</strong>
                           </span>
                         </div>
                       </div>
@@ -195,11 +222,11 @@ export const TourDetailModal: React.FC<TourDetailModalProps> = ({
                     </button>
 
                     {isExpanded && (
-                      <div className="p-3 sm:p-3.5 bg-slate-50/50 border-t border-slate-100 text-xs text-slate-600 space-y-2">
-                        <p className="leading-relaxed">{dayPlan.description}</p>
-                        <div className="flex flex-wrap gap-3 pt-1 text-[10px] sm:text-[11px] text-slate-500">
-                          <span>Meals: <strong className="text-slate-700">{dayPlan.meals}</strong></span>
-                          <span>Stay: <strong className="text-slate-700">{dayPlan.stay}</strong></span>
+                      <div className="p-3.5 sm:p-4 bg-slate-50/70 border-t border-slate-100 text-xs text-slate-600 space-y-2.5">
+                        <p className="leading-relaxed font-normal">{dayPlan.description}</p>
+                        <div className="flex flex-wrap gap-4 pt-2 border-t border-slate-200/60 text-[11px] text-slate-500">
+                          <span>Culinary: <strong className="text-slate-800">{dayPlan.meals}</strong></span>
+                          <span>Overnight: <strong className="text-slate-800">{dayPlan.stay}</strong></span>
                         </div>
                       </div>
                     )}
@@ -210,30 +237,30 @@ export const TourDetailModal: React.FC<TourDetailModalProps> = ({
           </div>
 
           {/* Inclusions & Exclusions */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-            <div className="bg-slate-50 border border-slate-200 p-3 sm:p-4 rounded-xl">
-              <h4 className="text-xs font-bold text-slate-900 mb-2 flex items-center gap-1.5">
-                <Check className="w-4 h-4 text-slate-700" />
-                Package Inclusions
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-emerald-50/40 border border-emerald-200/60 p-4 rounded-2xl">
+              <h4 className="text-xs font-bold text-emerald-900 mb-2.5 flex items-center gap-1.5 uppercase tracking-wider">
+                <Check className="w-4 h-4 text-emerald-700" />
+                White-Glove Inclusions
               </h4>
-              <ul className="space-y-1 sm:space-y-1.5">
+              <ul className="space-y-2">
                 {tour.inclusions.map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-1.5 text-xs text-slate-600">
-                    <Check className="w-3.5 h-3.5 text-slate-700 shrink-0 mt-0.5" />
+                  <li key={idx} className="flex items-start gap-2 text-xs text-slate-700">
+                    <Check className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
                     <span>{item}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
-            <div className="bg-slate-50 border border-slate-200 p-3 sm:p-4 rounded-xl">
-              <h4 className="text-xs font-bold text-slate-700 mb-2 flex items-center gap-1.5">
+            <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl">
+              <h4 className="text-xs font-bold text-slate-600 mb-2.5 flex items-center gap-1.5 uppercase tracking-wider">
                 <Ban className="w-4 h-4 text-slate-400" />
-                Exclusions
+                Additional Preferences (Exclusions)
               </h4>
-              <ul className="space-y-1 sm:space-y-1.5">
+              <ul className="space-y-2">
                 {tour.exclusions.map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-1.5 text-xs text-slate-500">
+                  <li key={idx} className="flex items-start gap-2 text-xs text-slate-500">
                     <span className="w-1.5 h-1.5 rounded-full bg-slate-400 mt-1.5 shrink-0" />
                     <span>{item}</span>
                   </li>
@@ -244,59 +271,59 @@ export const TourDetailModal: React.FC<TourDetailModalProps> = ({
         </div>
 
         {/* Modal Booking Footer */}
-        <div className="p-3 sm:p-4 bg-white border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
-          <div className="flex flex-wrap items-center justify-between sm:justify-start gap-2 w-full sm:w-auto">
-            <div className="bg-slate-50 px-2 py-1 rounded-lg border border-slate-200 flex-1 sm:flex-initial">
-              <label className="block text-[9px] text-slate-500 font-semibold uppercase">
-                Departure
+        <div className="p-4 sm:p-5 bg-gradient-to-r from-slate-900 to-slate-950 text-white border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 shrink-0">
+          <div className="flex flex-wrap items-center justify-between sm:justify-start gap-3 w-full sm:w-auto">
+            <div className="bg-white/10 px-3 py-1.5 rounded-xl border border-white/15 flex-1 sm:flex-initial">
+              <label className="block text-[9px] text-slate-300 font-semibold uppercase">
+                Departure Date
               </label>
               <select
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="bg-transparent text-xs font-semibold text-slate-800 outline-none cursor-pointer w-full"
+                className="bg-transparent text-xs font-semibold text-white outline-none cursor-pointer w-full"
               >
                 {tour.startDates.map((date) => (
-                  <option key={date} value={date}>
+                  <option key={date} value={date} className="text-slate-900">
                     {date}
                   </option>
                 ))}
               </select>
             </div>
 
-            <div className="bg-slate-50 px-2 py-1 rounded-lg border border-slate-200 flex-1 sm:flex-initial">
-              <label className="block text-[9px] text-slate-500 font-semibold uppercase">
-                Travelers
+            <div className="bg-white/10 px-3 py-1.5 rounded-xl border border-white/15 flex-1 sm:flex-initial">
+              <label className="block text-[9px] text-slate-300 font-semibold uppercase">
+                Party Size
               </label>
               <select
                 value={travelersCount}
                 onChange={(e) => setTravelersCount(Number(e.target.value))}
-                className="bg-transparent text-xs font-semibold text-slate-800 outline-none cursor-pointer w-full"
+                className="bg-transparent text-xs font-semibold text-white outline-none cursor-pointer w-full"
               >
                 {[1, 2, 3, 4, 5, 6, 8].map((n) => (
-                  <option key={n} value={n}>
-                    {n} Traveler{n > 1 ? 's' : ''}
+                  <option key={n} value={n} className="text-slate-900">
+                    {n} Guest{n > 1 ? 's' : ''}
                   </option>
                 ))}
               </select>
             </div>
           </div>
 
-          <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-100">
+          <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto border-t sm:border-t-0 pt-3 sm:pt-0 border-white/10">
             <div className="text-left sm:text-right">
               <span className="block text-[9px] uppercase text-slate-400 font-medium">
                 Total for {travelersCount} Guests
               </span>
-              <span className="text-base sm:text-xl font-bold text-slate-900">
+              <span className="text-lg sm:text-2xl font-serif font-bold text-amber-300">
                 {formatPrice(totalPriceUSD, currency)}
               </span>
             </div>
 
             <button
               onClick={() => onBookNow(tour, selectedDate, travelersCount)}
-              className="bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs px-4 sm:px-5 py-2.5 rounded-lg transition-colors flex items-center gap-1.5 shrink-0 cursor-pointer"
+              className="bg-gradient-to-r from-amber-400 to-amber-300 hover:from-amber-300 hover:to-amber-200 text-slate-950 font-bold text-xs sm:text-sm px-5 py-3 rounded-xl transition-all flex items-center gap-2 shrink-0 cursor-pointer shadow-lg hover:scale-105"
             >
-              <ShoppingBag className="w-3.5 h-3.5" />
-              <span>Book Package</span>
+              <ShoppingBag className="w-4 h-4" />
+              <span>Reserve Journey</span>
             </button>
           </div>
         </div>

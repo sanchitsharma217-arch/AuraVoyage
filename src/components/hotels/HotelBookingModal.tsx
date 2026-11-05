@@ -71,7 +71,7 @@ export const HotelBookingModal: React.FC<HotelBookingModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-sm overflow-y-auto">
-      <div className="relative w-full max-w-3xl bg-white rounded-2xl shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col border border-slate-200">
+      <div className="animate-modal-pop relative w-full max-w-3xl bg-white rounded-2xl shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col border border-slate-200">
         {/* Modal Top Banner */}
         <div className="relative h-44 sm:h-52 w-full shrink-0 overflow-hidden bg-slate-900">
           <img

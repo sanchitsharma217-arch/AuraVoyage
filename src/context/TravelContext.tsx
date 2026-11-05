@@ -8,6 +8,51 @@ interface ToastItem {
   type: 'success' | 'info' | 'warning';
 }
 
+export const SAMPLE_VIP_BOOKING: BookingConfirmation = {
+  bookingId: 'AV-8842-VIP',
+  createdAt: new Date().toISOString(),
+  customerName: 'Alexander Vance',
+  customerEmail: 'alexander.vance@auravoyage.luxury',
+  customerPhone: '+1 (555) 792-8692',
+  items: [
+    {
+      cartItemId: 'sample-tour-1',
+      itemType: 'tour',
+      referenceId: 'tour-1',
+      title: 'Bali Ultra-Luxury Villa & Private Yacht Expedition',
+      destination: 'Bali, Indonesia',
+      image: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=1000&q=80',
+      unitPriceUSD: 2450,
+      quantity: 1,
+      selectedDate: '2026-12-10',
+      endDate: '2026-12-17',
+      guestsCount: 2,
+      roomType: 'Presidential Cliffside Sanctuary',
+      specialRequests: 'VIP Chauffeur pickup upon arrival, Dom Pérignon welcome bottle in villa.'
+    },
+    {
+      cartItemId: 'sample-rest-1',
+      itemType: 'restaurant',
+      referenceId: 'rest-1',
+      title: 'Locavore NXT Private Tasting Table',
+      destination: 'Ubud, Bali',
+      image: 'https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?auto=format&fit=crop&w=1000&q=80',
+      unitPriceUSD: 195,
+      quantity: 2,
+      selectedDate: '2026-12-12',
+      timeSlot: '19:30 - Sunset Chef Table',
+      guestsCount: 2
+    }
+  ],
+  subtotalUSD: 2840,
+  discountUSD: 284,
+  taxUSD: 255.6,
+  totalUSD: 2811.6,
+  paymentMethod: 'Black Card / Concierge Pay',
+  paymentStatus: 'Confirmed',
+  voucherCodeUsed: 'VOYAGE10'
+};
+
 interface TravelContextType {
   currency: Currency;
   setCurrency: (c: Currency) => void;
@@ -39,6 +84,8 @@ interface TravelContextType {
   addToast: (message: string, type?: 'success' | 'info' | 'warning') => void;
   removeToast: (id: string) => void;
   cartTotalCount: number;
+  seedSampleBooking: () => void;
+  resetDemo: () => void;
 }
 
 const TravelContext = createContext<TravelContextType | undefined>(undefined);
@@ -73,9 +120,13 @@ export const TravelProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [bookings, setBookings] = useState<BookingConfirmation[]>(() => {
     try {
       const saved = localStorage.getItem('auravoyage_bookings');
-      return saved ? JSON.parse(saved) : [];
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+      return [SAMPLE_VIP_BOOKING];
     } catch {
-      return [];
+      return [SAMPLE_VIP_BOOKING];
     }
   });
 
@@ -134,10 +185,10 @@ export const TravelProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setWishlist((prev) => {
       const exists = prev.includes(id);
       if (exists) {
-        addToast(`Removed from saved favorites`, 'info');
+        addToast(title ? `Removed "${title}" from Wishlist` : 'Removed from Wishlist', 'info');
         return prev.filter((item) => item !== id);
       } else {
-        addToast(`Added ${title || 'item'} to saved favorites!`, 'success');
+        addToast(title ? `Added "${title}" to Wishlist!` : 'Added to Wishlist!', 'success');
         return [...prev, id];
       }
     });
@@ -145,25 +196,19 @@ export const TravelProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const isInWishlist = (id: string) => wishlist.includes(id);
 
-  const addToCart = (newItem: CartItem) => {
+  const addToCart = (item: CartItem) => {
     setCart((prev) => {
-      // Check if identical item already in cart
       const existingIndex = prev.findIndex(
-        (item) =>
-          item.referenceId === newItem.referenceId &&
-          item.itemType === newItem.itemType &&
-          item.selectedDate === newItem.selectedDate &&
-          item.roomType === newItem.roomType
+        (ci) => ci.referenceId === item.referenceId && ci.itemType === item.itemType && ci.selectedDate === item.selectedDate
       );
-
       if (existingIndex > -1) {
         const updated = [...prev];
-        updated[existingIndex].quantity += newItem.quantity;
+        updated[existingIndex].quantity += item.quantity;
         return updated;
       }
-      return [...prev, newItem];
+      return [...prev, item];
     });
-    addToast(`Added "${newItem.title}" to your trip booking bag!`, 'success');
+    addToast(`Added "${item.title}" to Trip Bag!`, 'success');
   };
 
   const removeFromCart = (cartItemId: string) => {
@@ -189,20 +234,41 @@ export const TravelProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setCart([]);
   };
 
-  const addBooking = (newBooking: BookingConfirmation) => {
-    setBookings((prev) => [newBooking, ...prev]);
+  const addBooking = (booking: BookingConfirmation) => {
+    setBookings((prev) => [booking, ...prev]);
     clearCart();
-    addToast(`Booking #${newBooking.bookingId} confirmed successfully!`, 'success');
+    addToast(`Reservation #${booking.bookingId} confirmed! Concierge dispatched.`, 'success');
   };
 
-  const addReview = (reviewData: Omit<UserReview, 'id' | 'date'>) => {
-    const newRev: UserReview = {
-      ...reviewData,
+  const addReview = (newReview: Omit<UserReview, 'id' | 'date'>) => {
+    const fullReview: UserReview = {
+      ...newReview,
       id: 'rev-' + Date.now(),
-      date: 'Just now',
+      date: new Date().toISOString().split('T')[0],
     };
-    setReviews((prev) => [newRev, ...prev]);
-    addToast('Thank you! Your verified traveler review has been posted.', 'success');
+    setReviews((prev) => [fullReview, ...prev]);
+    addToast('Thank you! Your verified review has been published.', 'success');
+  };
+
+  const seedSampleBooking = () => {
+    setBookings((prev) => {
+      if (prev.some((b) => b.bookingId === SAMPLE_VIP_BOOKING.bookingId)) {
+        return prev;
+      }
+      return [SAMPLE_VIP_BOOKING, ...prev];
+    });
+    setIsMyBookingsOpen(true);
+    addToast('Loaded VIP Concierge Sample Booking!', 'success');
+  };
+
+  const resetDemo = () => {
+    localStorage.removeItem('auravoyage_bookings');
+    localStorage.removeItem('auravoyage_cart');
+    localStorage.removeItem('auravoyage_wishlist');
+    setBookings([SAMPLE_VIP_BOOKING]);
+    setCart([]);
+    setWishlist(['tour-1', 'hotel-3']);
+    addToast('Demo environment refreshed successfully', 'info');
   };
 
   const cartTotalCount = cart.reduce((acc, item) => acc + item.quantity, 0);
@@ -240,6 +306,8 @@ export const TravelProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         addToast,
         removeToast,
         cartTotalCount,
+        seedSampleBooking,
+        resetDemo,
       }}
     >
       {children}
@@ -254,4 +322,3 @@ export const useTravel = () => {
   }
   return context;
 };
-

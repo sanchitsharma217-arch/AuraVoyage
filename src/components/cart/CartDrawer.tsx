@@ -40,7 +40,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-slate-950/70 backdrop-blur-sm">
       <div className="absolute inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col border-l border-slate-200">
+        <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col border-l border-slate-200 animate-in slide-in-from-right duration-300">
           {/* Drawer Header */}
           <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-slate-50">
             <div className="flex items-center gap-2">
@@ -180,7 +180,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
               </div>
               <div className="flex justify-between items-baseline pt-2 border-t border-slate-200">
                 <span className="font-semibold text-slate-800 text-xs">Estimated Total:</span>
-                <span className="text-lg font-bold text-slate-900">
+                <span className="text-xl font-serif font-bold text-slate-900">
                   {formatPrice(subtotalUSD, currency)}
                 </span>
               </div>
@@ -190,10 +190,10 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({ onOpenCheckout }) => {
                   setIsCartOpen(false);
                   onOpenCheckout();
                 }}
-                className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-xl transition-colors flex items-center justify-center gap-1.5"
+                className="w-full py-3.5 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 hover:from-slate-900 hover:to-slate-800 text-amber-300 text-xs font-bold rounded-xl transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer border border-amber-500/30 hover:scale-[1.01]"
               >
-                <span>Proceed to Checkout</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <span>Proceed to VIP Checkout</span>
+                <ArrowRight className="w-4 h-4 text-amber-300" />
               </button>
 
               <div className="flex items-center justify-between text-[10px] text-slate-400 pt-1">
